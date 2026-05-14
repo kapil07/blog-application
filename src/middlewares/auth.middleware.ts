@@ -2,34 +2,32 @@ import { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/AppError";
 import { verifyAccessToken } from "../utils/jwt.helper";
 import { IJwtPayload } from "../types";
-import { authRepository } from "../modules/auth/auth.repository";
-export const verifyUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+import { AuthService } from "../modules/auth/auth.service";
 
-      if(!token) {
-        throw new AppError("Unauthorized request", 401)
+export const verifyUser = (authService: AuthService) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const token =
+        req.cookies?.accessToken ||
+        req.header("Authorization")?.replace("Bearer ", "");
+
+      if (!token) {
+        throw new AppError("Unauthorized request", 401);
       }
 
       const decoded = verifyAccessToken(token) as IJwtPayload;
 
-      const user = await authRepository.findUserById(decoded.userId);
+      const userData = await authService.getCurrentUser(decoded.userId);
 
-      if(!user) {
-        throw new AppError("Unauthorized request", 401)
+      if (!userData) {
+        throw new AppError("Unauthorized request", 401);
       }
 
-      req.userId = user.id;
+      req.userId = userData.user.id;
 
       next();
-
-  } catch (error) {
-    next(new AppError("Invalid or expired token", 401))
-  }
+    } catch (error) {
+      next(new AppError("Invalid or expired token", 401));
+    }
+  };
 };

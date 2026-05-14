@@ -14,6 +14,7 @@ import {
 } from "./auth.schema.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import { verifyUser } from "../../middlewares/auth.middleware.js";
+import { authService } from "./container.js";
 
 const router = express.Router();
 
@@ -25,8 +26,8 @@ router.route("/login").post(validate(loginUserSchema), loginUserController);
 router
   .route("/refreshToken")
   .post(validate(refreshTokenSchema), refreshTokenController);
-router.route("/me").get(verifyUser, currentUserController);
-router.route("/logout").post(verifyUser, logOutController);
-router.route("/logOut-all-devices").post(verifyUser, logOutAllController);
+router.route("/me").get(verifyUser(authService), currentUserController);
+router.route("/logout").post(verifyUser(authService), logOutController);
+router.route("/logOut-all-devices").post(verifyUser(authService), logOutAllController);
 
 export default router;
