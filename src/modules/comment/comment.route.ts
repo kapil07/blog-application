@@ -1,13 +1,19 @@
-import express from 'express'
-import { authService } from '../auth/container';
-import { verifyUser } from '../../middlewares/auth.middleware';
-import { validate } from '../../middlewares/validate.middleware';
-import { createCommentSchema } from './comment.schema';
-import { createCommentController, deleteCommentController } from './comment.controller';
+import express from "express";
+import { verifyUser } from "../../middlewares/auth.middleware";
+import { validate } from "../../middlewares/validate.middleware";
+import { createCommentSchema } from "./comment.schema";
+import {
+  createCommentController,
+  deleteCommentController,
+  getCommentsByPostIdController,
+} from "./comment.controller";
 
-const router = express.Router()
+const router = express.Router();
 
-router.route("/create/post/:postId").post(verifyUser(authService),validate(createCommentSchema),createCommentController)
-router.route("/delete/:commentId").delete(verifyUser(authService),deleteCommentController)
+router
+  .route("/create/post/:postId")
+  .post(verifyUser, validate(createCommentSchema), createCommentController);
+router.route("/:postId").get(verifyUser, getCommentsByPostIdController);
+router.route("/delete/:commentId").delete(verifyUser, deleteCommentController);
 
-export default router
+export default router;

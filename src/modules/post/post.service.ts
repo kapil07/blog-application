@@ -1,10 +1,10 @@
 import { AppError } from "../../utils/AppError.js";
-import { deleteFromCloudinary, uploadToCloudinary } from "../../utils/cloudinary.helper.js";
+import { IFileService } from "../../utils/file.interface.js";
 import { IPostRepository } from "./post.interface.js";
 import { createPostDTO, updatePostDTO } from "./post.schema.js";
 
 export class PostService {
-  constructor(private repo: IPostRepository) {}
+  constructor(private repo: IPostRepository, private fileService: IFileService) {}
 
   async createPost(
     body: createPostDTO,
@@ -14,7 +14,7 @@ export class PostService {
     const { title, description } = body;
     let createdPost;
     if (localFilePath) {
-      const imageUrl = await uploadToCloudinary(localFilePath);
+      const imageUrl = await this.fileService.upload(localFilePath);
       createdPost = await this.repo.createPost(
         title,
         description,
@@ -44,8 +44,8 @@ export class PostService {
     return updatedPost
   }
 
-  async getAllPosts(){
-    const posts = await this.repo.getAllPost();
+  async getAllPosts(cursor?: string, limit?: number){
+    const posts = await this.repo.getAllPost(cursor, limit);
 
     return posts;
   }
@@ -59,7 +59,7 @@ export class PostService {
     }
 
     if(post.imageUrl) {
-      await deleteFromCloudinary(post.imageUrl)
+      await this.fileService.delete(post.imageUrl)
     }
 
     await this.repo.deletePost(postId)

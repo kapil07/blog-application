@@ -54,15 +54,21 @@ export const updatePostsController = catchAsync(
 
 export const getAllPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { cursor, limit } = req.query;
+    const parsedLimit = limit ? parseInt(limit as string) : 5;
 
-    const result =  await postService.getAllPosts();
+    const result = await postService.getAllPosts(cursor as string, parsedLimit);
 
-    sendResponse(res, 200,{
+    sendResponse(res, 200, {
       success: true,
       message: "All posts fetched successfully",
-      data: result
-
-    })
+      data: {
+        result,
+        meta: {
+          nextCursor: result.length > 0 ? result[result.length - 1].id : null,
+        },
+      },
+    });
   },
 );
 

@@ -1,3 +1,4 @@
+import { Comment } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
 import { ICommentRepository } from "./comment.interface";
 import { createCommentDTO } from "./comment.schema";
@@ -11,27 +12,46 @@ export class CommentRepository implements ICommentRepository {
         comment: data.comment,
       },
     });
-    return newComment
+    return newComment;
   }
 
-  async getCommentById(id: string){
-    const comment = await prisma.comment.findUnique({
-        where: {
-            id
-        },
-        include:{
-            post: true
-        }
-    }) 
+  async getCommentsByPostId(
+    postId: string,
+    limit: number = 5,
+    cursor?: string,
+  ): Promise<Comment[]> {
+    const comments = await prisma.comment.findMany({
+      where: {
+        postId,
+      },
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return comments;
+  }
 
-    return comment
+  async getCommentById(id: string) {
+    const comment = await prisma.comment.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        post: true,
+      },
+    });
+
+    return comment;
   }
 
   async deleteCommentById(id: string) {
     await prisma.comment.delete({
-        where:{
-            id
-        }
-    })
+      where: {
+        id,
+      },
+    });
   }
 }

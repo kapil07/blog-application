@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { z, ZodObject } from "zod";
+import { AppError } from "../utils/AppError";
 
 export const validate =
   (schema: ZodObject<any>) =>
@@ -12,10 +13,10 @@ export const validate =
         message: err.message,
       }));
 
-      return res.status(400).json({
-        message: "Validation failed",
-        errors,
-      });
+      throw new AppError(
+        errors.map((e) => `${e.field}: ${e.message}`).join(", "),
+        400,
+      );
     }
 
     req.body = result.data;

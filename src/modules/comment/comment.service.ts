@@ -26,6 +26,12 @@ export class CommentService {
     return newComment;
   }
 
+  async getCommentsByPostId(postId: string, limit: number, cursor?: string) {
+    const comments = await this.commentRepo.getCommentsByPostId(postId, limit, cursor)
+
+    return comments
+  }
+
   async deleteComment(commentId: string, userId: string) {
     const comment = await this.commentRepo.getCommentById(commentId)
 
