@@ -29,6 +29,10 @@ export class CommentService {
   async deleteComment(commentId: string, userId: string) {
     const comment = await this.commentRepo.getCommentById(commentId)
 
+    if(!comment) {
+        throw new AppError("Comment not found", 404)
+    }
+
     if(!(comment.userId === userId || comment.post.userId === userId)){
         throw new AppError("Unauthorized to perform this action", 401)
     }
